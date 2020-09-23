@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="http://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+
+<!-- Create an element where the map will take place -->
+<svg id="my_dataviz" width="400" height="300"></svg>
+
+<script>
+    var earths = [{ "name": "Argentina", "earths": 1.82 },
+    { "name": "Bolivia", "earths": 1.71 },
+    { "name": "Brazil", "earths": 1.8 },
+    { "name": "Chile", "earths": 2.52 },
+    { "name": "Colombia", "earths": 1.08 },
+    { "name": "Costa Rica", "earths": 1.64 },
+    { "name": "Cuba", "earths": 1.13 },
+    { "name": "Ecuador", "earths": 1.25 },
+    { "name": "El Salvador", "earths": 1.2 },
+    { "name": "Guatemala", "earths": 1.09 },
+    { "name": "Haiti", "earths": 0.35 },
+    { "name": "Honduras", "earths": 0.97 },
+    { "name": "Mexico", "earths": 1.67 },
+    { "name": "Nicaragua", "earths": 0.8 },
+    { "name": "Panama", "earths": 1.61 },
+    { "name": "Paraguay", "earths": 2.4 },
+    { "name": "Peru", "earths": 1.32 },
+    { "name": "Uruguay", "earths": 1.68 },
+    { "name": "Dominican Republic", "earths": 0.88 },
+    { "name": "Uruguay", "earths": 1.68 },
+    { "name": "Venezuela", "earths": 2.06 }];
+
+    // The svg
+    var svg = d3.select("svg"),
+        width = +svg.attr("width"),
+        height = +svg.attr("height");
+
+    // Map and projection
+    var path = d3.geoPath();
+    var projection = d3.geoMercator()
+        .scale(70)
+        .center([0, 20])
+        .translate([width / 2, height / 2]);
+
+    // Data and color scale
+    var data = d3.map();
+    var colorScale = d3.scaleThreshold()
+        .domain([1, 10, 100, 100])
+        .range(d3.schemeBlues[5]);
+
+    // Load external data and boot
+    d3.queue()
+        .defer(d3.json, "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson")
+        //.defer(d3.csv, "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world_population.csv", function (d) { data.set(d.code, +d.pop); })
+        .await(ready);
+
+
+    function findEarth(countryName) {
+        for (var elem of earths) {
+            if (elem.name.toLowerCase().trim() == countryName.toLowerCase().trim()) {
+                console.log(elem.name + ' gastó los recursos de ' + elem.earths + ' planetas tierra en 2016' );
+                return 100*elem.earths;
+            }
+        }
+        return 0;
+    }
+
+    function updateGeoInfo(dataArray) {
+        for(var elem of dataArray){
+            elem.total = findEarth(elem.properties.name)
+        }
+    }
+
+
+    async function ready(error, topo) {
+        await updateGeoInfo(topo.features);
+
+        let mouseOver = function (d) {
+            d3.selectAll(".Country")
+                .transition()
+                .duration(200)
+                .style("opacity", .5)
+            d3.select(this)
+                .transition()
+                .duration(200)
+                .style("opacity", 1)
+                .style("stroke", "black")
+        }
+
+        let mouseLeave = function (d) {
+            d3.selectAll(".Country")
+                .transition()
+                .duration(200)
+                .style("opacity", .8)
+            d3.select(this)
+                .transition()
+                .duration(200)
+                .style("stroke", "transparent")
+        }
+
+        // Draw the map
+        svg.append("g")
+            .selectAll("path")
+            .data(topo.features)
+            .enter()
+            .append("path")
+            // draw each country
+            .attr("d", d3.geoPath()
+                .projection(projection)
+            )
+            // set the color of each country
+            .attr("fill", function (d) {
+                //d.total = data.get(d.id) || 0;
+                return colorScale(d.total);
+            })
+            .style("stroke", "transparent")
+            .attr("class", function (d) { return "Country" })
+            .style("opacity", .8)
+            .on("mouseover", mouseOver)
+            .on("mouseleave", mouseLeave)
+    }
+
+</script>
