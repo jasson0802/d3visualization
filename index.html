@@ -8,9 +8,23 @@
 
 <!-- Create an element where the map will take place -->
 <svg id="my_dataviz" width="600" height="600"></svg>
+<style>
+div.tooltip {	
+    position: absolute;			
+    text-align: center;			
+    width: 60px;					
+    height: 28px;					
+    padding: 2px;				
+    font: 12px sans-serif;		
+    background: lightsteelblue;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;			
+}
+</style>
 
 <script>
-    var earths = [{ "name": "Argentina", "earths": 1.82 },
+    var paises = [{ "name": "Argentina", "earths": 1.82 },
     { "name": "Bolivia", "earths": 1.71 },
     { "name": "Brazil", "earths": 1.8 },
     { "name": "Chile", "earths": 2.52 },
@@ -32,6 +46,13 @@
     { "name": "Uruguay", "earths": 1.68 },
     { "name": "Venezuela", "earths": 2.06 }];
 
+
+    var div = d3.select("body").append("div")	
+    	.attr("class", "tooltip")				
+    	.style("opacity", 0);
+
+
+    
     // The svg
     var svg = d3.select("svg"),
         width = +svg.attr("width"),
@@ -52,19 +73,28 @@
 
     // Load external data and boot
     d3.queue()
-        .defer(d3.json, "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson")
+
+        .defer(d3.json, "./world.geojson")
         //.defer(d3.csv, "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world_population.csv", function (d) { data.set(d.code, +d.pop); })
         .await(ready);
 
 
     function findEarth(countryName) {
-        for (var elem of earths) {
+        for (var elem of paises) {
             if (elem.name.toLowerCase().trim() == countryName.toLowerCase().trim()) {
                 console.log(elem.name + ' gastó los recursos de ' + elem.earths + ' planetas tierra en 2016' );
                 return 100*elem.earths;
             }
-        }
+        } 
         return 0;
+    }
+    function getEarths(countryName){
+    	for (var elem of paises) {
+            if (elem.name.toLowerCase().trim() == countryName.toLowerCase().trim()) {
+                return elem.earths;
+            }
+        } 
+        return 0;	
     }
 
     function updateGeoInfo(dataArray) {
@@ -74,32 +104,16 @@
     }
 
 
+    var div = d3.select("body").append("div")	
+    	.attr("class", "tooltip")				
+    	.style("opacity", 0);
+
+
+
     async function ready(error, topo) {
         await updateGeoInfo(topo.features);
 
-        let mouseOver = function (d) {
-            d3.selectAll(".Country")
-                .transition()
-                .duration(200)
-                .style("opacity", .5)
-            d3.select(this)
-                .transition()
-                .duration(200)
-                .style("opacity", 1)
-                .style("stroke", "black")
-        }
-
-        let mouseLeave = function (d) {
-            d3.selectAll(".Country")
-                .transition()
-                .duration(200)
-                .style("opacity", .8)
-            d3.select(this)
-                .transition()
-                .duration(200)
-                .style("stroke", "transparent")
-        }
-
+        var tooltips2 	
         // Draw the map
         svg.append("g")
             .selectAll("path")
@@ -118,8 +132,39 @@
             .style("stroke", "transparent")
             .attr("class", function (d) { return "Country" })
             .style("opacity", .8)
-            .on("mouseover", mouseOver)
-            .on("mouseleave", mouseLeave)
+            .on("mouseover", function (d){
+            	d3.selectAll(".Country")
+                .transition()
+                .duration(200)
+                .style("opacity", .5)
+                div.transition()		
+                	.duration(200)		
+                	.style("opacity", .9);
+                div.html(d.properties.name + "<br>" + getEarths(d.properties.name))
+                   .style("left", (d3.event.pageX) + "px")
+                   .style("top", (d3.event.pageY - 28) + "px");	
+				console.log(d);
+            d3.select(this)
+                .transition()
+                .duration(200)
+                .style("opacity", 1)
+                .style("stroke", "black")
+                
+
+            })
+            .on("mouseleave", function (d){
+            	d3.selectAll(".Country")
+                .transition()
+                .duration(200)
+                .style("opacity", .8)
+            d3.select(this)
+                .transition()
+                .duration(200)
+                .style("stroke", "transparent")
+
+
+
+            })
     }
 
 </script>
