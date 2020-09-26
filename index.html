@@ -7,11 +7,28 @@
 <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
 
 <!-- Create an element where the map will take place -->
-<svg id="my_dataviz" width="700" height="1200"></svg>
+
+ 
 
 
 <style>
 
+
+body, h1, h2, h3, p {
+  margin: 30;
+  padding: 0;
+  font-family: 'Arial', 	Sans-serif;
+  font-size: 1.1em;
+  color: #333;
+  font-weight: 100;
+}
+h1, h2 {
+  text-align: left;
+  line-height: 1em;
+  font-size: 1.99em;
+  font-weight: 100;
+  color: #000;
+}
 /*Este div.tooltip es para darle las propiedades a la burbuja que emerge al
 colocar el mouse en cada pais */ 	
 div.tooltip {	
@@ -28,7 +45,14 @@ div.tooltip {
 }
 </style>
 
-<script>
+
+<body>
+	<div id="content" >
+		<h1>Earth's Required per country at  2016</h1>
+	</div>
+	<svg id="my_dataviz" width="700" height="1200"></svg>
+	<script>
+
 
 	/*var paises : contiene la informacion extraida del Excel,
 	donde esta informacion corresponde a la cantidad de recursos
@@ -60,19 +84,20 @@ div.tooltip {
     	.attr("class", "tooltip")				
     	.style("opacity", 0);
 
-
     
     // The svg : esto sera la base donde ira el mapa montado
     var svg = d3.select("svg"),
         width = +svg.attr("width"),
-        height = +svg.attr("height");
+        height = +svg.attr("height")
+        
 
     // Map and projection
     var path = d3.geoPath();
     var projection = d3.geoMercator()
         .scale(400)
         .center([-50, -10])
-        .translate([590, 400]);
+        .translate([590, 400])
+        ;
 
     // Data and color scale
     var data = d3.map();
@@ -175,5 +200,5 @@ div.tooltip {
 
             })
     }
-
-</script>
+	</script>
+</body>
