@@ -7,8 +7,13 @@
 <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
 
 <!-- Create an element where the map will take place -->
-<svg id="my_dataviz" width="600" height="600"></svg>
+<svg id="my_dataviz" width="700" height="1200"></svg>
+
+
 <style>
+
+/*Este div.tooltip es para darle las propiedades a la burbuja que emerge al
+colocar el mouse en cada pais */ 	
 div.tooltip {	
     position: absolute;			
     text-align: center;			
@@ -24,6 +29,10 @@ div.tooltip {
 </style>
 
 <script>
+
+	/*var paises : contiene la informacion extraida del Excel,
+	donde esta informacion corresponde a la cantidad de recursos
+	que basto cada pais en el 2016 */
     var paises = [{ "name": "Argentina", "earths": 1.82 },
     { "name": "Bolivia", "earths": 1.71 },
     { "name": "Brazil", "earths": 1.8 },
@@ -46,14 +55,14 @@ div.tooltip {
     { "name": "Uruguay", "earths": 1.68 },
     { "name": "Venezuela", "earths": 2.06 }];
 
-
+    //Este div sirve para armar la burbuja que sale de cada pais con si respectivo nombre y dato de consumo de recursos
     var div = d3.select("body").append("div")	
     	.attr("class", "tooltip")				
     	.style("opacity", 0);
 
 
     
-    // The svg
+    // The svg : esto sera la base donde ira el mapa montado
     var svg = d3.select("svg"),
         width = +svg.attr("width"),
         height = +svg.attr("height");
@@ -61,9 +70,9 @@ div.tooltip {
     // Map and projection
     var path = d3.geoPath();
     var projection = d3.geoMercator()
-        .scale(200)
-        .center([-28, 20])
-        .translate([width / 2, height / 2]);
+        .scale(400)
+        .center([-50, -10])
+        .translate([590, 400]);
 
     // Data and color scale
     var data = d3.map();
@@ -143,7 +152,7 @@ div.tooltip {
                 div.html(d.properties.name + "<br>" + getEarths(d.properties.name))
                    .style("left", (d3.event.pageX) + "px")
                    .style("top", (d3.event.pageY - 28) + "px");	
-				console.log(d);
+				
             d3.select(this)
                 .transition()
                 .duration(200)
